@@ -83,3 +83,5 @@ PUT /org/update
 - Delete Organization (Requires JWT)  
 DELETE /org/delete?organization_name=TestOrgUpdated  
 → Headers: Authorization: Bearer <JWT_TOKEN>
+
+📌 PLEASE FIND THE ANSWER TO ADDITIONAL QUESTIONS AND BRIEF NOTES ON DESIGN CHOICES IN THE TEXT FILES [additional_questions.txt](additional_questions.txt) and [brief_notes_on_designChoices.txt](brief_notes_on_designChoices.txt) respectively.
