@@ -1,0 +1,18 @@
+📌Brief notes explaining the design choices
+
+1) Master Database + Dynamic Collections
+   The system uses a single master database to store global metadata (organizations, admins) while creating a dedicated dynamic collection for each organization. This provides clear         logical separation between tenants while keeping the core metadata centralized and easy to       manage.
+2) FastAPI as the Backend Framework
+   FastAPI offers high performance, built-in validation with Pydantic, automatic documentation (Swagger), and a clean modular structure. It allows rapid development while remaining            production-friendly.
+3) MongoDB for Multi-Tenancy
+   MongoDB's flexible schema and cheap collection creation make it well-suited for a collection-per-tenant approach. Dynamic collection naming (org_<name>) makes tenant isolation simple and    intuitive.
+4) JWT-Based Authentication
+   JWT provides stateless authentication, making it easy to scale horizontally without session storage. Each token includes both the admin_id and org_id, ensuring organization-scoped          authorization.
+5) Secure Password Hashing with Argon2
+   Argon2 is selected for safe password hashing due to its modern security guarantees and resistance to brute-force attacks. It avoids bcrypt’s 72-byte limitations and is recommended     by OWASP.
+6) Service-Layer Architecture
+   Business logic is abstracted into service classes (OrgService, AuthService) to keep routes clean, improve maintainability, and support future expansion like RBAC or analytics modules.
+7) Validation + Pydantic Schemas
+   Every request and response is typed using Pydantic models for reliability and consistent data handling across the system.
+8) Scalable, Extensible Pattern
+   Although simple, this architecture can evolve into a more scalable solution—such as DB-per-tenant or hybrid tenancy—without major refactoring because core responsibilities are cleanly     separated.

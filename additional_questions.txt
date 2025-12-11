@@ -1,0 +1,52 @@
+📌ADDITIONAL QUESTIONS
+
+1) Do you think this is a good architecture with a scalable design? 
+   Yes it’s a good, pragmatic architecture for an MVP or small-to-medium SaaS, but it has clear trade-offs if you expect many tenants or very large enterprise customers.
+   → Why it’s good
+     - Simple and fast to implement: master metadata + dynamic per-org collections is easy to reason about and demonstrate.
+     - Reasonable isolation: per-org collections reduce accidental cross-tenant reads and make deleting/migrating a tenant straightforward.
+     - Fits the tech stack: FastAPI + MongoDB + JWT is developer-friendly and scales horizontally for typical web workloads.
+     - Clear separation of concerns: master organizations + admins collections keep metadata centralized.
+   → How to make it more scalable / production-ready
+    - Hybrid model: small tenants → shared collections with org_id; large tenants → dedicated DB/cluster.
+    - Use replica sets / Atlas to enable multi-document transactions and safer rename/migrations.
+    - Adopt short-lived JWT + refresh tokens, add RBAC, and centralize tenancy enforcement in middleware.
+    - Consider Motor (async driver) for better concurrency, and add monitoring, backups, and per-tenant limits.
+
+2) What can be the trade-offs with the tech stack and design choices?
+  → Trade-offs
+    i) Too many collections can reduce scalability
+       Each organization gets its own collection, which increases indexing overhead, memory usage, and complicates backups as the number of tenants grows.
+   ii) Cross-tenant analytics becomes difficult
+       Since data is spread across many collections, running global reports or aggregation requires scanning multiple collections instead of one.
+  iii) MongoDB lacks strong relational guarantees
+       Multi-document operations (like copying and dropping collections on rename) are not atomic unless a replica set is used.
+   iv) JWT revocation complexity
+       JWT is stateless and scalable, but revoking a token before expiration requires additional mechanisms.
+    v) Operational overhead increases with scale
+       Managing large numbers of collections, indexes, and monitoring becomes more complex in large deployments.
+
+3) Please feel free to explain briefly if you can design something better.
+    The following features or possible updates decribe a concrete design approach.
+    i) Hybrid tenancy:
+        - What: Small tenants → shared collections with an org_id column; large/enterprise tenants → dedicated database (DB-per-tenant).
+        - Why: Balances cost/operational overhead and isolation. Shared collections keep index count low and make global queries trivial; DB-per-tenant gives strong isolation, per-            tenant scaling and backup/restore.
+    ii) Use replica sets (or managed Atlas) + transactions
+        - What: Run MongoDB as a replica set (or use Atlas) so you can use multi-document transactions and renameCollection atomically.
+        - Why: Ensures create/update flows (create admin + org + links, rename collections) are atomic and safe from partial failures.
+    iii) Async DB driver and scalable app layer
+        - What: Use Motor (async Mongo driver) with FastAPI, containerize app, run on k8s with autoscaling.
+        - Why: Better I/O concurrency and simpler horizontal scaling under high request load.
+    iv) Auth hardening
+        - What: Short-lived access tokens + rotating refresh tokens stored server-side (or refresh token revocation lists); add RBAC and tenant-scoped middleware to enforce                org_id everywhere.
+        - Why: Safer token lifecycle and prevents privilege creep / accidental cross-tenant access.
+    v) Operational & data strategy
+        - Backups & restores: Per-tenant restore paths for DB-per-tenant; snapshot/partial restore strategies for shared collections.
+        - Monitoring: Metrics for collection count, index memory, slow queries, connection pool.
+        - Analytics: Stream change-events (Mongo change streams / CDC) to a data warehouse for cross-tenant analytics instead of scanning tenant collections.
+  vi) Security & compliance
+        - What: TLS, encryption-at-rest, secrets manager, least-privilege DB users, audit logging, and tenant-data residency by region when needed.
+        - Why: Meets enterprise compliance and reduces risk.
+  vii) Schema & migrations
+        - What: Per-tenant schema version stored in master metadata; migration tooling + feature flags to run safe upgrades per tenant.
+        - Why: Enables gradual upgrades and rollback without breaking tenants.
