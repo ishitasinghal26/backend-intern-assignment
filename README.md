@@ -34,27 +34,37 @@ Environment: Python 3.10+
 📌 Instructions to Run the Application
 
 1️) Clone the repository: Run the following commands in your terminal.
-- git clone repo-url
-- cd project-assignment
+```bash
+git clone repo-url
+cd project-assignment
+```
 
 2️) Create and activate a virtual environment: Run the following commands in your terminal.
-- python -m venv venv
-- venv\Scripts\activate # Windows
+```bash
+python -m venv venv
+venv\Scripts\activate  # Windows
+```
 
 3️) Install dependencies: Run the following command in your terminal.
-- pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
 4️) Configure environment variables  
 Create a .env file: (inside your project folder)  
 
-MONGO_URI=mongodb://localhost:27017  
-MONGO_DB_NAME=org_master_db  
-JWT_SECRET=supersecretkey123  
-JWT_ALGORITHM=HS256  
+```env
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB_NAME=org_master_db
+JWT_SECRET=supersecretkey123
+JWT_ALGORITHM=HS256
 JWT_EXP_MINUTES=60
+```
 
 5️) Start the server: Run the following command in your terminal.  
-- uvicorn app.main:app --reload
+```bash
+uvicorn app.main:app --reload
+```
 
 📌 API docs available at: http://localhost:8000/docs
 
@@ -63,13 +73,28 @@ JWT_EXP_MINUTES=60
 - Create Organization  
 POST /org/create  
 → Body (raw → json):  
-{ "organization_name": "TestOrg", "email": "admin@test.com", "password": "Password123" }
+```json
+{ 
+  "organization_name": "TestOrg",
+  "email": "admin@test.com",
+  "password": "Password123"
+}
+```
 
 - Admin Login  
 POST /admin/login  
-→ Body (raw → json):  
-{ "email": "admin@test.com", "password": "Password123" }  
-→ Response: { "access_token": "<JWT_TOKEN>", "token_type": "bearer" }
+→ Body (raw → json):
+```json
+{ "email": "admin@test.com",
+"password": "Password123"
+}
+```  
+→ Response: 
+```json
+{ "access_token": "<JWT_TOKEN>",
+"token_type": "bearer"
+}
+```
 
 - Get Organization  
 GET /org/get?organization_name=TestOrg
@@ -78,7 +103,12 @@ GET /org/get?organization_name=TestOrg
 PUT /org/update  
 → Headers: Authorization: Bearer <JWT_TOKEN>  
 → Body (raw → json):  
-{ "organization_name": "TestOrgUpdated", "email": "newadmin@test.com", "password": "NewPass123" }
+```json
+{ "organization_name": "TestOrgUpdated",
+"email": "newadmin@test.com",
+"password": "NewPass123"
+}
+```
 
 - Delete Organization (Requires JWT)  
 DELETE /org/delete?organization_name=TestOrgUpdated  
